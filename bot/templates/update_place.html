@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Изменить</title>
+</head>
+<body>
+    <h1>Изменить место</h1>
+    <form action="{{ url_for('insert_place', id=place['_id']) }}" method="post" enctype="multipart/form-data">
+        <label>Название</label><input type="text" name="name" value="{{ place['name'] }}"><br>
+        <label>Описание</label><input type="text" name="description" value="{{ place['description'] }}"><br>
+        <label>Ссылка на 2gis</label><input type="text" name="2gis"><br>
+        <fieldset style="width: 20%">
+            <legend>Категория</legend>
+            {% for category in category_list %}
+                <input type="radio" name="category" value="{{ category['name'] }}"
+                    {% if category['_id'] == place['category_id'] %}
+                        checked
+                    {% endif %}>
+                <label>{{ category["name"] }}</label><br>
+            {% endfor %}
+        </fieldset>
+        <input type="file" name="photos" multiple><br>
+        <input type="submit" value="Изменить" />
+    </form>
+</body>
+</html>
