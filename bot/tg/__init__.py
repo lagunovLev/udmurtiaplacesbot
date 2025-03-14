@@ -107,7 +107,10 @@ async def edit_message_with_place(update: Update, context: ContextTypes.DEFAULT_
        reply_markup=InlineKeyboardMarkup([[
             InlineKeyboardButton(f"Лайк👍{info["likes"]}", callback_data=f"like {info["_id"]} {update.effective_chat.id}"),
             InlineKeyboardButton(f"Дизлайк👎{info["dislikes"]}", callback_data=f"dislike {info["_id"]} {update.effective_chat.id}")
-        ]]),)
+        ], [
+            InlineKeyboardButton(f"Посмотреть отзывы",
+                                 callback_data=f"reviews {info["_id"]} {update.effective_chat.id}")
+        ] if "reviews" in info and info["reviews"] else []]))
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
