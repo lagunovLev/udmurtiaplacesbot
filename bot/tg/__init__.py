@@ -75,6 +75,7 @@ async def send_place(update: Update, context: ContextTypes.DEFAULT_TYPE, reply_m
         text=f"{info["name"]}\n{info["description"]}",
         reply_markup=reply_markup,
     )
+
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text="Оценить место",
