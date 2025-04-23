@@ -139,11 +139,15 @@ def add_place():
         photos_id.append(id)
 
     reviews = None
+    latitude = None
+    longtitude = None
     if parsing_link:
         parsed_data = scraping2gis.get_data(parsing_link)
         reviews = parsed_data["reviews"]
+        latitude = parsed_data["latitude"]
+        longtitude = parsed_data["longtitude"]
 
-    places.add(name, photos_id, description, category_name, reviews=reviews)
+    places.add(name, photos_id, description, category_name, reviews=reviews, lat=latitude, long=longtitude)
     return redirect(url_for('admin'))
 
 
@@ -166,11 +170,15 @@ def insert_place():
         photos_id.append(id)
 
     reviews = None
+    latitude = None
+    longtitude = None
     if parsing_link:
         parsed_data = scraping2gis.get_data(parsing_link)
         reviews = parsed_data["reviews"]
+        latitude = parsed_data["latitude"]
+        longtitude = parsed_data["longtitude"]
 
-    places.update(place_id, name, photos_id, description, category_name, reviews=reviews)
+    places.update(place_id, name, photos_id, description, category_name, reviews=reviews, lat=latitude, long=longtitude)
     return redirect(url_for('admin'))
 
 

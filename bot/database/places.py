@@ -7,8 +7,10 @@ from database import categories
 collect: collection = db_client[env_variables.db_name]["places"]
 
 
-def add(name, photos_id, description, category_name, reviews=None):
+def add(name, photos_id, description, category_name, reviews=None, lat=None, long=None):
     collect.insert_one({"name": name,
+                        "latitude": lat,
+                        "longitude": long,
                         "photos_id": photos_id,
                         "description": description,
                         "category_id": categories.find_by_name(category_name)["_id"],
@@ -19,9 +21,11 @@ def add(name, photos_id, description, category_name, reviews=None):
                         "dislikes": 0})
 
 
-def update(place_id, name, photos_id, description, category_name, reviews=None):
+def update(place_id, name, photos_id, description, category_name, reviews=None, lat=None, long=None):
     collect.update_one({"_id": ObjectId(place_id)},
                        {"$set": {"reviews": reviews,
+                                 "latitude": lat,
+                                 "longitude": long,
                                  "name": name,
                                  "photos_id": photos_id,
                                  "description": description,
