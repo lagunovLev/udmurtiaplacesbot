@@ -33,6 +33,7 @@ MAIN, SEARCHING, NEXT_OR_EXIT, CHOOSING_CATEGORY = range(4)
 main_keyboard = ReplyKeyboardMarkup([
     ["Популярные✨", "Поиск🔎"],
     ["Категории🗃️", "Случайное место🎲"],
+    ["Ближайшие места🚩"]
 ], one_time_keyboard=False, resize_keyboard=True)
 
 searching_keyboard = ReplyKeyboardMarkup([
