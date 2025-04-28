@@ -73,16 +73,18 @@ def extract_2gis_coordinates(url: str) -> tuple[tuple[float, float], tuple[float
 
     # Извлекаем основные координаты (из пути)
     path_match = re.search(r'/(\d+\.\d+),(\d+\.\d+)(?:\?|$)', decoded_url)
-    if not path_match:
-        raise ValueError("Не удалось извлечь координаты из URL")
+    #if not path_match:
+    #    raise ValueError(f"Не удалось извлечь координаты из URL {url}")
 
-    lat1, lon1 = map(float, path_match.groups())
-    main_coords = (lat1, lon1)
+    main_coords = (0, 0)
+    if path_match:
+        lat1, lon1 = map(float, path_match.groups())
+        main_coords = (lat1, lon1)
 
     # Извлекаем координаты из параметра `m` (если есть)
     query = urlparse(decoded_url).query
     m_match = re.search(r'm=([^/]+)', query)
-    m_coords = None
+    m_coords = (0, 0)
 
     if m_match:
         coords_str = m_match.group(1)
@@ -93,15 +95,15 @@ def extract_2gis_coordinates(url: str) -> tuple[tuple[float, float], tuple[float
 
 
 def get_data(url):
-    reviews_url = url + "/tab/reviews"
+    reviews_url = url.split("?")[0] + "/tab/reviews" + "?" + url.split("?")[1] if "?" in url else url + "/tab/reviews"
     main_coords, m_coords = extract_2gis_coordinates(url)
     #img_url = url + "/tab/photos"
     #name = get_description_and_name(description_url)
 
     return {
         "reviews": get_reviews(reviews_url),
-        "latitude": main_coords[1],
-        "longtitude": main_coords[0],
+        "latitude": main_coords[1] or m_coords[1],
+        "longtitude": main_coords[0] or m_coords[0],
         #"description": desc,
         #"name": name,
         #"images": get_images(img_url)

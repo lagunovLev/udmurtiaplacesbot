@@ -75,7 +75,12 @@ async def send_place(update: Update, context: ContextTypes.DEFAULT_TYPE, reply_m
         text=f"{info["name"]}\n{info["description"]}",
         reply_markup=reply_markup,
     )
-
+    if "latitude" in info and info["latitude"] and "longitude" in info and info["longitude"]:
+        await context.bot.send_location(
+            chat_id=update.effective_chat.id,
+            latitude=info["latitude"],
+            longitude=info["longitude"],
+        )
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text="Оценить место",
