@@ -6,7 +6,8 @@ from cleantext import clean
 from . import util
 import logging
 
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, InlineKeyboardButton, InlineKeyboardMarkup, \
+    KeyboardButton
 from bot.database import categories as cat, db_client
 from telegram.ext import (
     Application,
@@ -28,12 +29,12 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
-MAIN, SEARCHING, NEXT_OR_EXIT, CHOOSING_CATEGORY = range(4)
+MAIN, SEARCHING, NEXT_OR_EXIT, GETTING_LOCATION = range(4)
 
 main_keyboard = ReplyKeyboardMarkup([
     ["Популярные✨", "Поиск🔎"],
     ["Категории🗃️", "Случайное место🎲"],
-    ["Ближайшие места🚩"]
+    [KeyboardButton("Ближайшие места🚩", request_location=True)],
 ], one_time_keyboard=False, resize_keyboard=True)
 
 searching_keyboard = ReplyKeyboardMarkup([
@@ -76,11 +77,18 @@ async def send_place(update: Update, context: ContextTypes.DEFAULT_TYPE, reply_m
         text=f"{info["name"]}\n{info["description"]}",
         reply_markup=reply_markup,
     )
-    if "latitude" in info and info["latitude"] and "longitude" in info and info["longitude"]:
+    if "distance" in info:
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=f"Расстояние до места: {info["distance"]} км",
+            reply_markup=reply_markup,
+        )
+    coord = info["location"]["coordinates"] if "location" in info else None
+    if coord and coord[0] and coord[1]:
         await context.bot.send_location(
             chat_id=update.effective_chat.id,
-            latitude=info["latitude"],
-            longitude=info["longitude"],
+            latitude=coord[1],
+            longitude=coord[0],
         )
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
@@ -153,6 +161,16 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         context.user_data["results_counter"] = 0
         return await return_to_main_or_next(update, context, "Следующее популярное место🔽")
     return MAIN
+
+
+async def location_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print("Получена позиция")
+    location = update.message.location
+
+    context.user_data["function"] = send_place
+    context.user_data["results"] = list(places.get_nearest_places(user_lat=location.latitude, user_lng=location.longitude))  # TODO
+    context.user_data["results_counter"] = 0
+    return await return_to_main_or_next(update, context, "Следующее ближайшее место🔽")
 
 
 async def searching(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -255,6 +273,9 @@ def configure_application() -> Application:
                 MessageHandler(
                     filters.ALL, main_menu
                 ),
+                #MessageHandler(
+                #    filters.LOCATION, location_handler,
+                #),
                 CallbackQueryHandler(button_handler)
             ],
             SEARCHING: [
@@ -270,10 +291,18 @@ def configure_application() -> Application:
                 ),
                 CallbackQueryHandler(button_handler)
             ],
+            #GETTING_LOCATION: [
+            #    MessageHandler(
+            #        filters.LOCATION,
+            #        location_handler,
+            #    ),
+            #    CallbackQueryHandler(button_handler)
+            #]
         },
         fallbacks=[],
     )
 
+    application.add_handler(MessageHandler(filters.LOCATION, location_handler))
     application.add_handler(conv_handler)
     application.add_handler(CommandHandler('start', start))
     return application

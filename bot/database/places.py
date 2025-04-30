@@ -1,3 +1,5 @@
+from typing import List, Dict
+
 from bson.objectid import ObjectId
 import env_variables
 from database import db_client
@@ -9,8 +11,7 @@ collect: collection = db_client[env_variables.db_name]["places"]
 
 def add(name, photos_id, description, category_name, reviews=None, lat=None, long=None):
     collect.insert_one({"name": name,
-                        "latitude": lat,
-                        "longitude": long,
+                        "location": {"type": "Point", "coordinates": [long, lat]},
                         "photos_id": photos_id,
                         "description": description,
                         "category_id": categories.find_by_name(category_name)["_id"],
@@ -24,13 +25,71 @@ def add(name, photos_id, description, category_name, reviews=None, lat=None, lon
 def update(place_id, name, photos_id, description, category_name, reviews=None, lat=None, long=None):
     collect.update_one({"_id": ObjectId(place_id)},
                        {"$set": {"reviews": reviews,
-                                 "latitude": lat,
-                                 "longitude": long,
+                                 "location": {"type": "Point", "coordinates": [long, lat]},
                                  "name": name,
                                  "photos_id": photos_id,
                                  "description": description,
                                  "category_id": categories.find_by_name(category_name)["_id"]
                                  }})
+
+
+def get_nearest_places(
+    user_lat: float,
+    user_lng: float,
+    max_distance: float = None,
+    limit: int = None
+) -> List[Dict]:
+    """
+    Возвращает точки из MongoDB, отсортированные по расстоянию от заданной координаты.
+
+    Параметры:
+        db_host (str): URI подключения к MongoDB (например, "mongodb://localhost:27017").
+        db_name (str): Имя базы данных.
+        collection_name (str): Имя коллекции с точками.
+        user_lat (float): Широта пользователя.
+        user_lng (float): Долгота пользователя.
+        max_distance (float, опционально): Максимальное расстояние в метрах.
+        limit (int, опционально): Ограничение количества результатов.
+
+    Возвращает:
+        List[Dict]: Список документов, отсортированных по расстоянию (ближайшие сначала).
+                   Каждый документ содержит поле `distance` (расстояние в метрах).
+    """
+
+    pipeline = [
+        {
+            "$match": {
+                "location": {
+                    "$exists": True,  # Только документы с полем location
+                    "$type": "object"  # Проверяет, что это объект (GeoJSON)
+                }
+            }
+        },
+        {
+            "$geoNear": {
+                "near": {
+                    "type": "Point",
+                    "coordinates": [user_lng, user_lat]  # Порядок: [longitude, latitude]
+                },
+                "distanceField": "distance",  # Добавляет поле с расстоянием
+                "spherical": True,  # Учитывает сферичность Земли
+                "key": "location"   # Поле с GeoJSON-точками
+            }
+        },
+        {
+            "$sort": {"distance": 1}  # Сортировка по возрастанию расстояния
+        }
+    ]
+
+    # Опциональные параметры
+    if max_distance is not None:
+        pipeline[0]["$geoNear"]["maxDistance"] = max_distance
+
+    if limit is not None:
+        pipeline.append({"$limit": limit})
+
+    results = list(collect.aggregate(pipeline))
+    return results
 
 
 def give_like(place_id, chat_id):
