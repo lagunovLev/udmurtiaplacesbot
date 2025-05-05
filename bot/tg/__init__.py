@@ -77,10 +77,10 @@ async def send_place(update: Update, context: ContextTypes.DEFAULT_TYPE, reply_m
         text=f"{info["name"]}\n{info["description"]}",
         reply_markup=reply_markup,
     )
-    if "distance" in info:
+    if "distance_km_rounded" in info:
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
-            text=f"Расстояние до места: {info["distance"]} км",
+            text=f"Расстояние до места: {info["distance_km_rounded"]} км",
             reply_markup=reply_markup,
         )
     coord = info["location"]["coordinates"] if "location" in info else None
@@ -271,11 +271,11 @@ def configure_application() -> Application:
         states={
             MAIN: [
                 MessageHandler(
-                    filters.ALL, main_menu
+                    filters.LOCATION, location_handler,
                 ),
-                #MessageHandler(
-                #    filters.LOCATION, location_handler,
-                #),
+                MessageHandler(
+                    ~filters.LOCATION, main_menu
+                ),
                 CallbackQueryHandler(button_handler)
             ],
             SEARCHING: [
@@ -302,7 +302,7 @@ def configure_application() -> Application:
         fallbacks=[],
     )
 
-    application.add_handler(MessageHandler(filters.LOCATION, location_handler))
+    #application.add_handler(MessageHandler(filters.LOCATION, location_handler))
     application.add_handler(conv_handler)
     application.add_handler(CommandHandler('start', start))
     return application

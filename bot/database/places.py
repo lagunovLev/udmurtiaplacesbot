@@ -57,27 +57,37 @@ def get_nearest_places(
     """
 
     pipeline = [
-        {
-            "$match": {
-                "location": {
-                    "$exists": True,  # Только документы с полем location
-                    "$type": "object"  # Проверяет, что это объект (GeoJSON)
-                }
-            }
-        },
+        #{
+        #    "$match": {
+        #        "location": {
+        #            "$exists": True,  # Только документы с полем location
+        #            "$type": "object"  # Проверяет, что это объект (GeoJSON)
+        #        }
+        #    }
+        #},
         {
             "$geoNear": {
                 "near": {
                     "type": "Point",
                     "coordinates": [user_lng, user_lat]  # Порядок: [longitude, latitude]
                 },
-                "distanceField": "distance",  # Добавляет поле с расстоянием
+                "distanceField": "distance_m",  # Добавляет поле с расстоянием
                 "spherical": True,  # Учитывает сферичность Земли
                 "key": "location"   # Поле с GeoJSON-точками
             }
         },
         {
-            "$sort": {"distance": 1}  # Сортировка по возрастанию расстояния
+            "$addFields": {
+                "distance_km_rounded": {
+                    "$round": [  # Округление до 1 десятичного знака
+                        {"$divide": ["$distance_m", 1000]},  # Метры → километры
+                        1
+                    ]
+                }
+            }
+        },
+        {
+            "$sort": {"distance_m": 1}  # Сортировка по возрастанию расстояния
         }
     ]
 
