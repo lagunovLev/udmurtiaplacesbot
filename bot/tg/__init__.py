@@ -267,7 +267,7 @@ def configure_application() -> Application:
                    .build())
 
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("start", start)],
+        entry_points=[CommandHandler("start", start), MessageHandler(filters.ALL, start)],
         states={
             MAIN: [
                 MessageHandler(
@@ -302,7 +302,7 @@ def configure_application() -> Application:
         fallbacks=[],
     )
 
-    #application.add_handler(MessageHandler(filters.LOCATION, location_handler))
+    #application.add_handler(MessageHandler(filters.ALL, start))
     application.add_handler(conv_handler)
-    application.add_handler(CommandHandler('start', start))
+    #application.add_handler(CommandHandler('start', start))
     return application
