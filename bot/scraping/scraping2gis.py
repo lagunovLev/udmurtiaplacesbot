@@ -2,23 +2,19 @@ from urllib.parse import unquote, urlparse
 import re
 import requests
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
 }
 
 
-def get_reviews(url):
-    response = requests.get(url, headers=headers)
-    if response.status_code != 200:
-        print(f"Ошибка: {response.status_code}")
-        return []
-
-    soup = BeautifulSoup(response.text, 'html.parser')
+def get_reviews(response):
+    soup = BeautifulSoup(response, 'html.parser')
     reviews = []
 
     for review in soup.find_all('a', class_='_1msln3t'):
-        #print(review)
         text = review.text
 
         reviews.append({
@@ -26,6 +22,16 @@ def get_reviews(url):
         })
 
     return reviews
+
+
+def get_rating(response):
+    soup = BeautifulSoup(response, 'html.parser')
+    return soup.find("div", class_="_1tam240").text
+
+
+def get_ratings_number(response):
+    soup = BeautifulSoup(response, 'html.parser')
+    return soup.find("div", class_="_1y88ofn").text
 
 
 def get_description_and_name(url):
@@ -97,15 +103,25 @@ def extract_2gis_coordinates(url: str) -> tuple[tuple[float, float], tuple[float
 def get_data(url):
     reviews_url = url.split("?")[0] + "/tab/reviews" + "?" + url.split("?")[1] if "?" in url else url + "/tab/reviews"
     main_coords, m_coords = extract_2gis_coordinates(url)
-    #img_url = url + "/tab/photos"
-    #name = get_description_and_name(description_url)
+
+    print("Извлекаем html")
+    options = Options()
+    options.headless = True
+    print("Запуск драйвера")
+    driver = webdriver.Chrome(options=options)
+    print("==============")
+    driver.get(reviews_url)
+    print("Извлекаем html")
+    reviews_response = driver.page_source
+    driver.quit()
+    print("Извлечен html")
 
     return {
-        "reviews": get_reviews(reviews_url),
         "latitude": main_coords[1] or m_coords[1],
         "longtitude": main_coords[0] or m_coords[0],
-        #"description": desc,
-        #"name": name,
-        #"images": get_images(img_url)
+        "url": url,
+        "reviews": get_reviews(reviews_response),
+        "rating": get_rating(reviews_response),
+        "ratings_number": get_ratings_number(reviews_response),
     }
 

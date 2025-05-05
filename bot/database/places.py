@@ -9,9 +9,12 @@ from database import categories
 collect: collection = db_client[env_variables.db_name]["places"]
 
 
-def add(name, photos_id, description, category_name, reviews=None, lat=None, long=None):
+def add(name, photos_id, description, category_name, reviews=None, lat=None, long=None, rating=None, ratings_number=None, url=None):
     collect.insert_one({"name": name,
                         "location": {"type": "Point", "coordinates": [long, lat]},
+                        "rating": rating,
+                        "ratings_number": ratings_number,
+                        "url": url,
                         "photos_id": photos_id,
                         "description": description,
                         "category_id": categories.find_by_name(category_name)["_id"],
@@ -22,10 +25,13 @@ def add(name, photos_id, description, category_name, reviews=None, lat=None, lon
                         "dislikes": 0})
 
 
-def update(place_id, name, photos_id, description, category_name, reviews=None, lat=None, long=None):
+def update(place_id, name, photos_id, description, category_name, reviews=None, lat=None, long=None, rating=None, ratings_number=None, url=None):
     collect.update_one({"_id": ObjectId(place_id)},
                        {"$set": {"reviews": reviews,
                                  "location": {"type": "Point", "coordinates": [long, lat]},
+                                 "rating": rating,
+                                 "ratings_number": ratings_number,
+                                 "url": url,
                                  "name": name,
                                  "photos_id": photos_id,
                                  "description": description,

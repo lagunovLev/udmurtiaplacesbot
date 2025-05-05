@@ -141,13 +141,19 @@ def add_place():
     reviews = None
     latitude = None
     longtitude = None
+    rating = None
+    ratings_number = None
+    url = None
     if parsing_link:
         parsed_data = scraping2gis.get_data(parsing_link)
         reviews = parsed_data["reviews"]
         latitude = parsed_data["latitude"]
         longtitude = parsed_data["longtitude"]
+        rating = parsed_data["rating"]
+        ratings_number = parsed_data["ratings_number"]
+        url = parsed_data["url"]
 
-    places.add(name, photos_id, description, category_name, reviews=reviews, lat=latitude, long=longtitude)
+    places.add(name, photos_id, description, category_name, reviews=reviews, lat=latitude, long=longtitude, rating=rating, ratings_number=ratings_number, url=url)
     return redirect(url_for('admin'))
 
 
@@ -172,13 +178,19 @@ def insert_place():
     reviews = None
     latitude = None
     longtitude = None
+    rating = None
+    ratings_number = None
+    url = None
     if parsing_link:
         parsed_data = scraping2gis.get_data(parsing_link)
         reviews = parsed_data["reviews"]
         latitude = parsed_data["latitude"]
         longtitude = parsed_data["longtitude"]
+        rating = parsed_data["rating"]
+        ratings_number = parsed_data["ratings_number"]
+        url = parsed_data["url"]
 
-    places.update(place_id, name, photos_id, description, category_name, reviews=reviews, lat=latitude, long=longtitude)
+    places.update(place_id, name, photos_id, description, category_name, reviews=reviews, lat=latitude, long=longtitude, rating=rating, ratings_number=ratings_number, url=url)
     return redirect(url_for('admin'))
 
 
