@@ -72,9 +72,14 @@ async def send_place(update: Update, context: ContextTypes.DEFAULT_TYPE, reply_m
                         },
                         upsert=True
                     )
+    desc_string = info["description"]
+    if "rating" in info:
+        desc_string += "\n\n" + util.rating_to_stars(info["rating"]) + " " + info["rating"]
+    if "ratings_number" in info:
+        desc_string += "   " + info["ratings_number"]
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=f"{info["name"]}\n{info["description"]}",
+        text=f"{info["name"]}\n{desc_string}",
         reply_markup=reply_markup,
     )
     if "distance_km_rounded" in info:
