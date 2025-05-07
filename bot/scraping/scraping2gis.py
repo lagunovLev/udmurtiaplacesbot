@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
@@ -104,17 +105,12 @@ def get_data(url):
     reviews_url = url.split("?")[0] + "/tab/reviews" + "?" + url.split("?")[1] if "?" in url else url + "/tab/reviews"
     main_coords, m_coords = extract_2gis_coordinates(url)
 
-    print("Извлекаем html")
     options = Options()
     options.headless = True
-    print("Запуск драйвера")
-    driver = webdriver.Chrome(options=options)
-    print("==============")
+    driver = webdriver.Chrome(options=options, service=Service(executable_path=r'C:\Users\l.d.lagunov\Downloads\chromedriver-win64\chromedriver-win64\chromedriver.exe'))
     driver.get(reviews_url)
-    print("Извлекаем html")
     reviews_response = driver.page_source
     driver.quit()
-    print("Извлечен html")
 
     return {
         "latitude": main_coords[1] or m_coords[1],
