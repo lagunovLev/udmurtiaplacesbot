@@ -2,10 +2,9 @@ import threading
 
 import flask
 from asgiref.wsgi import WsgiToAsgi
-from telegram.ext import CallbackQueryHandler, Application
 
 from app import app
-import admin_panel
+from bot.admin_panel import admin_panel
 import os
 import env_variables
 from tg import *
