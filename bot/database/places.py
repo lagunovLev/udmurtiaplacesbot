@@ -63,14 +63,6 @@ def get_nearest_places(
     """
 
     pipeline = [
-        #{
-        #    "$match": {
-        #        "location": {
-        #            "$exists": True,  # Только документы с полем location
-        #            "$type": "object"  # Проверяет, что это объект (GeoJSON)
-        #        }
-        #    }
-        #},
         {
             "$geoNear": {
                 "near": {

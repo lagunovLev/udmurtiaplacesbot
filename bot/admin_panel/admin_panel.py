@@ -78,12 +78,6 @@ def admin():
     cats_iter = categories.get_all({"_id": 0})
     cat = list(cats_iter)
     l = len(cat)
-    #places_list = {}
-    #for category in cat:
-    #    category_name = category['name']
-    #    category_id = category['_id']
-    #    places_cur = places.get_all(args={'category_id': category_id}).
-    #    places_list[category_name] = list(places_cur)
     places_list = places.collect.aggregate([
         {"$lookup": {
             "from": "fs.files",
@@ -110,7 +104,6 @@ def admin():
         }},
         {"$unset": "_id"},
     ])
-    #print(*list(places_list), sep="\n")
 
     return render_template('admin.html', username=current_user.username, categorylength=l, categorylist=cat, places_list=places_list)
 

@@ -239,10 +239,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 async def show_in_category(update: Update, context: ContextTypes.DEFAULT_TYPE, data):
     category_id = data[1]
     category = cat.get_by_id(category_id)
-    #next_or_exit_keyboard = ReplyKeyboardMarkup([
-    #    ["Назад в главное меню◀️", "Следующая категория🔽"],
-    #], one_time_keyboard=False, resize_keyboard=True)
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Места категории {category['name']}:") # reply_markup=next_or_exit_keyboard
+    await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Места категории {category['name']}:")
     res = list(places.get_with_photos(
         {"$match": {
             "category_id": bson.ObjectId(category_id),
@@ -296,18 +293,9 @@ def configure_application() -> Application:
                 ),
                 CallbackQueryHandler(button_handler)
             ],
-            #GETTING_LOCATION: [
-            #    MessageHandler(
-            #        filters.LOCATION,
-            #        location_handler,
-            #    ),
-            #    CallbackQueryHandler(button_handler)
-            #]
         },
         fallbacks=[],
     )
 
-    #application.add_handler(MessageHandler(filters.ALL, start))
     application.add_handler(conv_handler)
-    #application.add_handler(CommandHandler('start', start))
     return application
