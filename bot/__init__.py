@@ -5,7 +5,7 @@ from asgiref.wsgi import WsgiToAsgi
 from telegram.ext import CallbackQueryHandler, Application
 
 from app import app
-import main
+import admin_panel
 import os
 import env_variables
 from tg import *
