@@ -162,7 +162,7 @@ async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         return await return_to_main_or_next(update, context, "Следующее случайное место🔽")
     if util.compare_input(update.message.text, "популярные"):
         context.user_data["function"] = send_place
-        context.user_data["results"] = list(places.get_with_photos({"$sort": {"likes": -1}}))
+        context.user_data["results"] = list(places.get_with_photos({"$sort": {"rating": -1}}))
         context.user_data["results_counter"] = 0
         return await return_to_main_or_next(update, context, "Следующее популярное место🔽")
     return MAIN
